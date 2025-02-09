@@ -176,4 +176,45 @@ One problem we could encounter is if bad data is given to the system. It it's ba
 
 ## Instance-based versus model-based learning
 
+Machine learning systems can generalize. A lot of ML tasks are about making predictions.
+
+### Instance-based learning
+
+The most trivial form of learning; by heart.
+
+If you were to create a spam filter this way, it would just flag all emails that are identical to emails that have already been flagged by users—not the worst solution, but certainly not the best.
+
+Instead of this, though, you could flag emails that are very *similar* to the known spam emails. A very basic *measure of similarity* would be words they have in common.
+
+This is called instance-based learning: the system learns the examples by heart, then generalizes to new cases by using a similarity measure to compare them to the learned examples.
+
+![image](https://github.com/user-attachments/assets/17129657-e71e-4f94-8aac-ab04514ee8e1)
+
+### Model-based learning
+
+Another way to generalize is to build a model of these examples then use it to make predicitons. This is called model-based learning.
+
+![image](https://github.com/user-attachments/assets/4e9545be-9461-4954-8fcc-d5848c62d9c7)
+
+Let's say you want to know if money makes people happy. You take some life satisfaction data and GDP per capita data for a bunch of countries, then plot them.
+
+![image](https://github.com/user-attachments/assets/a12cbd47-20d0-4478-86c4-1e470a6f4dd3)
+
+Although this data is noisy (a little random), it still looks like there's a linear correlation. Now you decide to model life happiness as a linear function of GDP per capita. This step is called model selection; you select a linear model of life satifaction with just one attribute, GDP per capita.
+
+life_satisfaction = θ<sub>0</sub> + θ<sub>1</sub> × GDP_per_capita
+
+Using the parameters, you can model any linear function.
+
+![image](https://github.com/user-attachments/assets/e876b716-7ecc-4eed-818b-84c462d35e4f)
+
+Before you use your model, you need to set the parameters. But how do you do this? You need a specifc performance measure. Either define a utitlity fucntion that measures how good it is, or a cost function to describe how bad it is. For linear regression problems, people normally use cost functions.
+
+Now, the linear regression algorithm comes in;: feed it your training examples and it finds the parameters that best fit your data.
+
+![image](https://github.com/user-attachments/assets/494acf7e-70d7-4ea2-9eaa-674c05df6e78)
+
+
+
+
 
