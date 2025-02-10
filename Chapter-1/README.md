@@ -210,11 +210,69 @@ Using the parameters, you can model any linear function.
 
 Before you use your model, you need to set the parameters. But how do you do this? You need a specifc performance measure. Either define a utitlity fucntion that measures how good it is, or a cost function to describe how bad it is. For linear regression problems, people normally use cost functions.
 
-Now, the linear regression algorithm comes in;: feed it your training examples and it finds the parameters that best fit your data.
+Now, the linear regression algorithm comes in: feed it your training examples and it finds the parameters that best fit your data.
 
 ![image](https://github.com/user-attachments/assets/494acf7e-70d7-4ea2-9eaa-674c05df6e78)
 
+So the steps are studying the data, selecting a model, training it on the training data, and finally applying the model to make predictions on new cases. This is what a typical machine learning project looks like.
 
+## Main challenges of machine learning
 
+Since our main task is to select a learning algorithm and train it on data, the things that can go wrong are a 'bad algorithm' and 'bad data.'
 
+### Insufficient quantity of training data
+
+For humans to learn what something is, you just need them to see it once. Like an apple. After they see it, they can recognize an apple that comes in different colors and shapes. ML is not really that genius yet. It takes a ton of data for most ML algorithms to work properly. Even for some simple problems, you might need thousands of examples, and for problems like speech or image recognition, you might need millions.
+
+### Nonrepresentive training data
+
+In order to generalize well, it is crucial that your training data be representative of the new cases you want to generalize to. This is true whether you use instance-based learning or model-based learning.
+
+![image](https://github.com/user-attachments/assets/a670e9fd-5e0c-4e43-821a-52af7e2be230)
+
+Looking at the last example, we didn't include some countries (the red dots). After including them, we get the solid line. The dotted line represents our previous model.
+
+So you can't make accurate representations.
+
+It is crucial to use a training set that is representative of the cases you want to generalize to. This is often harder than it sounds: if the sample is too small, you will have sampling noise (i.e., nonrepresentative data as a result of chance), but even very large samples can be nonrepresentative if the sampling method is flawed. This is called sampling bias.
+
+### Poor-quality data
+
+Having your data filled wiht errors, outliers and noise will make it harder for the system to detect any patterns. Cleaning your data is often well-worth the effort.
+
+### Irrelevant features
+
+Garbage in, garbage out. The system will only learn with relevant features.
+
+A critical part of the success of a Machine Learning project is coming up with a good set of features to train on. This process, called feature engineering, involves the following steps:
+
+• Feature selection (selecting the most useful features to train on among existing features)
+
+• Feature extraction (combining existing features to produce a more useful one— as we saw earlier, dimensionality reduction algorithms can help)
+
+• Creating new features by gathering new data
+
+### Overfitting the training data
+
+Imagine you visit a country and a taxi driver rips you off. You might be tempted to say that all tax drivers are thieves. Overgeneralizing is something we do and something algorithms can do too. This is called overfitting: it means the model performs but doesn't generalize well.
+
+Complex models can detect subtle patterns, but if it's noisy or too small, then it can actually detect patterns in the noise itself. For example, feed the life satisfaction model more attributes like the names of the countries. It see that countries that have a w in their name have life satisfaction over 7, but how would this generalize to Rwanda or Zimbabwe? This pattern is by pure chance, but there's no way the model can know that.
+
+Constraining a model to make it simpler is called regularization. The linear model earlier has two parameters, θ<sub>1</sub> and θ<sub>1</sub>. That gives the model two degrees of freedom to adapt to the training data. If we forced one of them to be 0, we would've had a hard time fitting it correctly. If we picked one of them to be modified but small, we would have freedom between one and two degrees. You want to find the right balance between fitting the training data perfectly and keeping the model simple enough to ensure that it will generalize well.
+
+![image](https://github.com/user-attachments/assets/642bec88-2655-409d-8b3d-0eac097df083)
+
+The amount of regularization applied can be controlled by a hyperparameter. A hyperparameter is a parameter of a learning algorithm. Tuning hyperparameters is important.
+
+### Underfitting the training data
+
+Underfitting is the opposite of overfitting, happening when your model is too simple to learn. The reality of life is more complex than the model we had for life satisfation, so it's bound to be innacurate.
+
+Here are the main options for fixing this problem:
+
+• Select a more powerful model, with more parameters.
+
+• Feed better features to the learning algorithm (feature engineering).
+
+• Reduce the constraints on the model (e.g., reduce the regularization hyperparameter).
 
