@@ -284,7 +284,7 @@ If the training error is low but the generalization error is high, then you're o
 
 It's actually common to use 80% of the data and use the other 20 % to test it. Of course it depends on the size, but that's just a general statement.
 
-### Hyperparameter tning and model selection
+### Hyperparameter tuning and model selection
 
 What if you want to evaluate a model but you have to pick between a linear model and a polynomial model? One option is to just test both and compare how well they generalize.
 
@@ -292,5 +292,11 @@ Suppose the linear model generalizes better. Now, you want to apply some regular
 
 The problem was that you measured the generalization error multipe times on the test set and adapted the model and hyperparameters to produce the best model **for that particular set**. This means the model isn't likely to perform well on new data.
 
+A common solution for this is called holdout validation: simply hold out part of the training set to evaluate several candidate models and select the best one. The new held-out set is called the validations set, aka development set or dev set.
 
+More specifically, you train multiple models with various hyperparameters on the reduced training set (full training set minus validations set) and select the model that performs the best. After the holdout validation process, train the best model on the full training set including the validation set and boom. You get the final model.
+
+If the validation set it too small, the model evaluations will be imprecise and you may select a suboptimal model by mistake.
+
+If the validation set is too large, the remaining training set will be much smaller than the full training set. 
 
