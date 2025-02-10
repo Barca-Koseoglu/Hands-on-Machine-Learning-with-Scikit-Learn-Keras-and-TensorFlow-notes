@@ -276,3 +276,21 @@ Here are the main options for fixing this problem:
 
 • Reduce the constraints on the model (e.g., reduce the regularization hyperparameter).
 
+## Testing and Validating
+
+The only way to know a model works well is to test it out. If you put your model into production and observe it, you might see how well it performs, but customers won't be happy if it works badly. Instead, split the data into a training set and a test set. Train your model using the training set, and test it using the test set. The error rate on new cases is called the generalization error, aka out-of-sample error. By evaluating the model on the test set, you get an estimation for this error.
+
+If the training error is low but the generalization error is high, then you're overfitting the data.
+
+It's actually common to use 80% of the data and use the other 20 % to test it. Of course it depends on the size, but that's just a general statement.
+
+### Hyperparameter tning and model selection
+
+What if you want to evaluate a model but you have to pick between a linear model and a polynomial model? One option is to just test both and compare how well they generalize.
+
+Suppose the linear model generalizes better. Now, you want to apply some regularization to avoid overfitting. What value will you assign the regularization hyperparameter? One option is to train 100 different models with 100 different values for it. After doing this, you find one with low error and send it off to production. But a higher error rate comes out. So what happened?
+
+The problem was that you measured the generalization error multipe times on the test set and adapted the model and hyperparameters to produce the best model **for that particular set**. This means the model isn't likely to perform well on new data.
+
+
+
