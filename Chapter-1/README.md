@@ -298,5 +298,8 @@ More specifically, you train multiple models with various hyperparameters on the
 
 If the validation set it too small, the model evaluations will be imprecise and you may select a suboptimal model by mistake.
 
-If the validation set is too large, the remaining training set will be much smaller than the full training set. 
+If the validation set is too large, the remaining training set will be much smaller than the full training set. Since the final model will be trained on the full training set, it is not ideal to compare candidate models trained on a much smaller training set. It would be like selecting the fastest sprinter to participate in a marathon. One way to solve this problem is to perform repeated cross-validation, using many small validation sets. Each model is evaluated once per validation set after it is trained on the rest of the data. by averaging out all the e evaluations of a model, you get a much more accurate measure of its performance. There is a drawback, however: the training time is multiplied by the number of validation sets.
 
+### Data mismatch
+
+Sometime's it's easy to get a large amount of data for training
