@@ -51,3 +51,6 @@ Imagine you work at a company. Your boss tells you the model's output will be fe
 
 ![image](https://github.com/user-attachments/assets/7ed64c2c-684e-4a8a-89a5-14791a244756)
 
+### Pipelines
+
+A sequence of data processing components is called a data pipeline. Pipelines are very common in machine learning systems. Components normally run asynchronously. Each one pulls in a lot of data, processes it, and spills out that data into another data store. The interface between comp0nents is the data store.
