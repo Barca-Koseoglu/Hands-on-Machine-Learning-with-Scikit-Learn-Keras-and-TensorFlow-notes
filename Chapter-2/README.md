@@ -49,11 +49,11 @@ Like this:
 You can also specify the stratification of a column in the train_test_split function
 
 ### Geographcial data visualization: 
-
+```python
 housing.plot(kind="scatter", x="longitude", y="latitude", grid=True, alpha=0.2 (controls opacity))
 
 plt.show()
-
+```
 ### Correlation: 
 
 $$
@@ -67,7 +67,7 @@ This might miss out on non-linear relationships though.
 
 ### Scatter matrix
 
-scatter_matrix(dataframe[attributes)
+scatter_matrix(dataframe[attributes])
 plt.show()
 
 Makes a len(attributes) x len(attributes) matrix of correlations.
@@ -95,11 +95,11 @@ Without scaling, most models will be biased toward ignoring the median income an
 minimax scaling (aka normalization) is very simple: take x as the thing you want to scale from the dataset X. Scale it by doing (x - min(x))/(max(x) - min(x)). This works because if x is the minimum, it's zero, and if x is the max, the denominator and numerator are the same, so x is 1. Anything between the min and max is between 0 and 1. Very smart but easy way to scale values, although definetly prone to problems like large outliers skewing results.
 
 Code for it:
-
+```python
 from sklearn.preprocessing import MinMaxScaler
 
 min_max_scaler = MinMaxScaler(feature_range=(-1, 1))
-
+```
 Now, here it shows it from -1 to 1. This is found using the general formula for minmax (I said minimax a lot confusing it for something else, the correct wording is MIN-MAX) which is the formula to scale it from [a,b]: a + ((x-min(x))*(b-a))/(max(x)-min(x)). It's pretty intuitive once again, using very simple variable manipulation.
 
 
@@ -108,11 +108,11 @@ Now, here it shows it from -1 to 1. This is found using the general formula for 
 Standardization first subtracts the mean value (so standardized values have a zero mean), then it divides the result by the standard deviation (so the values have standard deviation equal to 1: literally unit spread). This technique doesn't restrict values to a specific range, but it's much less affected by outliers. Imagine we have a datset of values from 0-15, but we accidentaly get 100 in there. Min-max would make that value equal to 1 and the rest of the value from 0 to 0.15, but standardization doesn't get affected as much as this.
 
 Code:
-
+```python
 from sklearn.preprocessing import StandardScaler
 
 std_scaler = StandardScaler()
-
+```
 ### Heavy tails
 
 Weird subtitle, but very very VERY important topic. When a feature's distribution has a heavy tail (aka when the values far from the mean aren't exponentially rare), both min-max and standardization will scale most values to a small range. Before we scale the values, we should transform them to get rid of that heavy tail, and try to make the distributions kinda symmetrical. A common way to do this is to replace the feature with it's square root (raise it to a power between 0 and 1 if you want more or less power than that). If it has a VERY long and heavy tail, like a dinosaurs, then replace the feature with it's logarithm. The best way to understand this is to visualize it:
@@ -156,10 +156,11 @@ Precisely!
 To revert this, you have to exponentiate the prediciton. The transformers of Skitlearn, luckily, do have an inverse_transform() method that makes it easy to comput the inverse. Doing everything manually is the bane of everyone's existence, though, so instead there's something called TransformedTargetRegressor, where you just construct it and give it the regression model you're using with the original labels. It'll automatically scale the labels, train the model on those labels, then revert the predicitons to the original scale.
 
 Like this:
-
+```python
 from sklearn.compose import TransformedTargetRegressor
-model = TransformedTargetRegressor(LinearRegression(), transformer=StandardScaler())
 
+model = TransformedTargetRegressor(LinearRegression(), transformer=StandardScaler())
+```
 #### A quick note on SciKit-Learn's design
 
 All objects share very consistent and simple intefaces, whic makes it easy to use.
@@ -174,3 +175,22 @@ All objects share very consistent and simple intefaces, whic makes it easy to us
 
 Skitlearn does give you a bunch of useful transformers, but, as is everything, you cannot be reliant on others. You have to write your own.
 
+For transformers that don't need training, you can just write a function that takes a NumPy array as input and outputs the transformed array.
+```python
+from sklearn.preprocessing import FunctionTransformer
+
+log_transformer = FunctionTransformer(np.log, inverse_func=np.exp)
+
+log_pop = log_transformer.transform(X)
+```
+Inverse_func is optional but you can use it in case you plan to use it somewhere, like in TransformedTargetRegressor.
+
+You can also modify hyperparameters using kw_args.
+
+Custom transformers are also useful when combining features, like taking the ratios between input features.
+
+### Trainable transformers
+
+FunctionTransformer is cool and all, but what if we wanted it to be trainable? For this, we need to write a whole custom class. We have to make it learn some parameters in the fit() method and use them later in the transform() method.
+
+You can get fit_transform() for free by simply adding TransformerMixin as a base class.
