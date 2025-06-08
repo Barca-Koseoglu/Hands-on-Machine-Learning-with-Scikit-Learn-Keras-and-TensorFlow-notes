@@ -129,3 +129,48 @@ When a feature has multimodel distrbution (two or more peaks in the data, called
 
 ### The worst thing this book has tried explaining since chapter 1: the radial basis function
 
+One more way to approach a multimodel distribution is to add a feature for each of the modes (or at least the main ones) that represent the **similarity** between that node and the other value points. This is typically computed using a radial basis function (RBF), which is any function that depends on the distance between a fixes point and an input. Normally, Gaussian RBF is used. This is what it looks like:
+
+$$
+K(x, x') = \exp(-\gamma \|x - x'\|^2)
+$$
+
+Where x` is the fixed point, x is your input, the y looking thing basically controls if the definition of closeness is more strict (higher y) or more loose (smaller y), the swquaring is there to "penalize" higher values and prevent negatives, we negate y to make it into a fraction for exp(), which is just "e to the power of whatever's in the parentheses". There we go.
+
+An example of using could be when you want to find the similarity of other points with the median house value with some other houses. If that age group is correlated with lower prices, the feature might actually help.
+
+![image](https://github.com/user-attachments/assets/0a5b2dc8-eaab-4cc0-808a-91ca05b05c0f)
+
+The lines are the rbf functions plotted, with each corresponding to a different value of gamma, the y looking thing.
+
+A machine learning engineer and data scientist must have the ability to figure out relavent and important data from other bits of data. The models are just a small part of their jobs. I would know. I am a machine learning engineer. That makes 500K a year.
+
+In my dreams.
+
+## Target value manipulation
+
+Target value might also need to be transformed and changed, like if they have a heavy tail, we could choose to replace it with its logarithm. But... wouldn't we be predicting the logs of the target values, not the actual target values?
+
+Precisely!
+
+To revert this, you have to exponentiate the prediciton. The transformers of Skitlearn, luckily, do have an inverse_transform() method that makes it easy to comput the inverse. Doing everything manually is the bane of everyone's existence, though, so instead there's something called TransformedTargetRegressor, where you just construct it and give it the regression model you're using with the original labels. It'll automatically scale the labels, train the model on those labels, then revert the predicitons to the original scale.
+
+Like this:
+
+from sklearn.compose import TransformedTargetRegressor
+model = TransformedTargetRegressor(LinearRegression(), transformer=StandardScaler())
+
+#### A quick note on SciKit-Learn's design
+
+All objects share very consistent and simple intefaces, whic makes it easy to use.
+
+**Estimators**: Anything that can estimate some parameters based on a dataset is called an estimator, for example, SimpleImputer. The estimation itself is done using .fit() and it takes a dataset as a parameter (two for supervised learning since it needs the labels). Any other parameter is considered a hyperparameter, like the strategy for SimpleImputer.
+
+**Transformers**: Some estimators can also transform a dataset. They're called transformers. Transformation is done by the .transform() method with the dataset to transform as a parameter. Transformation generally relies on learned parameters, as is the case with SimpleImputer. Every transformer has a convenient .fit_transform() method, which is the same as calling them step by step except it might be faster.
+
+**Predictors**: Some estimators can make predictions. They're called predictors. Linear Regression is a predictor. It has a .predict() method that takes a dataset of new instances and returns its predictions. .score() is used to measure the quality of the predictions.
+
+### Custom Transformers
+
+Skitlearn does give you a bunch of useful transformers, but, as is everything, you cannot be reliant on others. You have to write your own.
+
