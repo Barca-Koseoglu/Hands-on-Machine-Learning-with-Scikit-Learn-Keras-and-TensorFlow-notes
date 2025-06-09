@@ -269,3 +269,4 @@ num_pipeline = Pipeline([
 
 This scared the CRAP out of me when I first learned about it, but it's actually very straightforward: It's just a step-by-step process. First, the 'impute' named action is done, where SimpleImputer is applied, then 'standardize' uses StandardScaler on the data. Then we're done! A pipline just puts everything in one place so it's easy to use, to evaluate, to tweak and change, and to use in the future for other projects.
 
+If you don't want to name anything, just use make_pipeline from sklearn.pipeline. It'll simply use the name of the transformers' classes in lowercase and without underscores. If multiple transformers have the same name, it just does -1 to -x for x of the same transformers. 
