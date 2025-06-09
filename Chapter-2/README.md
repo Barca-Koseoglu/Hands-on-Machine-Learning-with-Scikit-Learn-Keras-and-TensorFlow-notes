@@ -193,4 +193,79 @@ Custom transformers are also useful when combining features, like taking the rat
 
 FunctionTransformer is cool and all, but what if we wanted it to be trainable? For this, we need to write a whole custom class. We have to make it learn some parameters in the fit() method and use them later in the transform() method.
 
-You can get fit_transform() for free by simply adding TransformerMixin as a base class.
+You can get fit_transform() for free by simply adding TransformerMixin as a base class. BaseEstimator is also inherited to use scikit-learn things like set_params().
+
+Here's a Standard Scaler clone:
+```python
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_array, check_is_fitted
+
+class StandardScalerClone(BaseEstimator, TransformerMixin):
+    def __init__(self, with_mean=True): # no *args or **kwargs!
+        self.with_mean = with_mean
+
+    def fit(self, X, y=None): # y is required even though we don't use it
+        X = check_array(X) # checks that X is an array with finite float values
+        self.mean_ = X.mean(axis=0)
+        self.scale_ = X.std(axis=0)
+        self.n_features_in_ = X.shape[1] # every estimator stores this in fit()
+        return self # always return self!
+
+    def transform(self, X):
+        check_is_fitted(self) # looks for learned attributes (with trailing _)
+        X = check_array(X)
+        assert self.n_features_in_ == X.shape[1]
+        if self.with_mean:
+            X = X - self.mean_
+        return X / self.scale_
+```
+
+Takes some work, but it's very cool!
+
+A custom transformer can use other estimators in its implementation. For example, here's some code that uses KMeans clustering in the fit() method to find the main clusters in the training data, then uses rbf_kernel() in the transform method to measure how similar each samle is to each cluster center.
+
+```python
+from sklearn.cluster import KMeans
+
+class ClusterSimilarity(BaseEstimator, TransformerMixin):
+    def __init__(self, n_clusters=10, gamma=1.0, random_state=None):
+        self.n_clusters = n_clusters
+        self.gamma = gamma
+        self.random_state = random_state
+
+    def fit(self, X, y=None, sample_weight=None):
+        self.kmeans_ = KMeans(self.n_clusters, random_state=self.random_state)
+        self.kmeans_.fit(X, sample_weight=sample_weight)
+        return self # always return self!
+
+    def transform(self, X):
+        return rbf_kernel(X, self.kmeans_.cluster_centers_, gamma=self.gamma)
+
+    def get_feature_names_out(self, names=None):
+        return [f"Cluster {i} similarity" for i in range(self.n_clusters)]
+```
+
+### A quick aside on what KMeans clustering is
+KMeans clustering is a way to "group together" data using a number of center points, called centroids (K). The data isn't actually grouped together; the centroids are moved to the means of the data points that are "assigned" to them based on their Euclidean Distance, which is how far they are from that centroid using the pythagorean theorem, i.e. sqrt((x-centroid)^2 + (y-centroid)^2 ...). They use this algorithm for every point and every centroid, and the points that are closer to a centroid than other centroid are "assigned" to that centroid. Then, the means of the assigned points are taken and the centroid is relocated there, and this process continues however many times you want or until there is no change in any centroids. The centroids' original positions are randomly assigned, so there is some potential for very stupid looking clusters, but there are techniques that I am currently not familiar with that are used to fix this problem, including KMeans++.
+
+So our complicated looking transformer fits the data to a KMeans Clustering algorithm, uses weights to... well... weigh the data, then measures the similarity between each district and the cluster centers. Here's a cool graph depicting what this looks like:
+
+![image](https://github.com/user-attachments/assets/e959d026-7ce0-407f-87fe-f40282b27f76)
+
+## Transformation pipelines
+
+There are MANY, things to do when data preprocessing. I signed up for this sh** because of how cool AI was, and now I'm sifting through house prices and biomedical records. I STILL LOVE IT.
+
+Because there are so many steps to this data preprocessing, and those steps need to be executed in the right order, we can use **PIPELINESSSS**.
+
+```python
+from sklearn.pipeline import Pipeline
+
+num_pipeline = Pipeline([
+    ("impute", SimpleImputer(strategy="median")),
+    ("standardize", StandardScaler()),
+])
+```
+
+This scared the CRAP out of me when I first learned about it, but it's actually very straightforward: It's just a step-by-step process. First, the 'impute' named action is done, where SimpleImputer is applied, then 'standardize' uses StandardScaler on the data. Then we're done! A pipline just puts everything in one place so it's easy to use, to evaluate, to tweak and change, and to use in the future for other projects.
+
