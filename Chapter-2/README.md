@@ -270,3 +270,73 @@ num_pipeline = Pipeline([
 This scared the CRAP out of me when I first learned about it, but it's actually very straightforward: It's just a step-by-step process. First, the 'impute' named action is done, where SimpleImputer is applied, then 'standardize' uses StandardScaler on the data. Then we're done! A pipline just puts everything in one place so it's easy to use, to evaluate, to tweak and change, and to use in the future for other projects.
 
 If you don't want to name anything, just use make_pipeline from sklearn.pipeline. It'll simply use the name of the transformers' classes in lowercase and without underscores. If multiple transformers have the same name, it just does -1 to -x for x of the same transformers. 
+
+When you call the pipeline’s fit() method, it calls fit_transform() sequentially on all the transformers, passing the output of each call as the parameter to the next call until it reaches the final estimator, for which it just calls the fit() method.
+
+The pipeline uses the same methods as the final estimator, so the last part of the sequence. If it's a predictor, it uses predict(). If it's a tranformer, it uses transform(). Normally, it'll be a predictor, since the data being just transformed is probably not the goal.
+
+Pipelines support indexing, so doing pipeline[1] gives the second estimator in the pipeline.
+
+## Column Transformer
+
+Handling categorical and numerical columns seperately is quite a hassel. That's why it would be much much more convenitent to have a single transformer that can handle all columns. For this, we can use a ColumnTransformer. These, well, transform the columns based on if they're numerical or categorical. It requires a list of length-3 tuples that have a unique, non-underscore-d name, a transformer (the pipeline), and a list of names or indices of columns that the transformers should be applied to.
+
+make_column_selector() is used if you really don't want to list out the names of the features and instead just want all of one datatype to be transformed using a transformer. Also, if you don't want to name it yourself, you can use make_column_transformer() and skip out on the names, and it works just like make_pipelines()
+
+## FINALLY! Model time :}
+
+It's the moment that you have definetly been waiting for.... the models. The models do the cool things like prediction. Doing it is very easy. If you have the preprocessing pipeline and want to use Linear Regression, you can do:
+
+```python
+from sklearn.linear_model import LinearRegression
+
+lin_reg = make_pipeline(preprocessing, LinearRegression())
+lin_reg.fit(housing, housing_labels)
+```
+lin_reg is kind of stacked right now, which is slang for has a punch of pipelines inside of a column transformer which is also inside of a pipeline. The magic of the depth of this is very beautiful.
+
+You can use this to find the RMSE of your predicitons to measure your performance:
+
+```python
+from sklearn.metrics import mean_squared_error
+
+lin_rmse = mean_squared_error(housing_labels, housing_predictions, squared=False)
+lin_rmse #68687.89176589991
+```
+This says that our model's predictions are, on average, about 69k dollars off, which if most districts are between something like 120k and 265k, this is not very good. This is an example of the model underfitting the training data. When this happens it can mean that the features do not provide enough information to make good predictions, or that the model is not powerful enough. Now, to fix underfitting, we can do three things: use a more powerful model, feed the model better features, or reduce constraints on a model. Reducing constraints is useless since this model is not regularized (I am NOT getting into the meaning of that since I'm too lazy and I don't 100% understand it intuitively yet), and we already did a LOT for our features, so we could try a more complex model.
+
+One such model is a DecisionTreeRegressor. An indian guy made and AMAZING video on this which you can look up on youtube. It's extremely intuitive and sounds hard until you actually see it being used. This model can find complex non-linear relationships in data using decision trees. Now, when you do the same thing the code did there but replace the lin reg model with the dectree model, you will get an RMSE of 0.
+
+What? Perfect predicitons? We've solved housing prices and we're gonna make millions off of this model!
+
+HECK no. This just shows that the model probably disgustingly overfit the data. We can check by using cross-validation.
+
+### Cross-validation
+
+Skitlearn has a k-fold cross validation feature that randomly splits the data into k non-overlapping subsets called folds then trains and evaluates the model by training it on k-1 folds and testing it on the left-out fold, and does this k times for a different left-out fold each time. Then it returns a list of all the results of the training and testing, and the mean is what the performance of the model would be. 
+
+from sklearn.model_selection import cross_val_score
+
+You can do .describe() on the result changed to whatever score you want (since it isn't automatically for a loss function) and made into a Pandas series. Doing this shows you the mean and std. The mean is the performance, and the std is the measure of precision.
+
+Doing this for the linear regression model, it'll basically be the exact same except the std is slightly bigger, so technically the dectreereg is better. Now we know that there's an overfitting problem since the training error is low while the validation error is high.
+
+Let's hold out hope. The bigger cooler brother of DecisionTreeRegresor is RandomForestRegressor. It works by doing a lot of smaller, more... random... decision tree regressors and using randomized features as well, then averages out what all those decision trees say the price should be. This randomized method is actually fairly useful most times.
+
+The results are better, and there's less overfitting, but nevertheless, there's still overfitting.
+
+This model choosing part of the process should be quick, testing out a few different models not mentioned like SVMs with different kernels and maybe even a neural network. The goal is to find two to five promising models, then fine tune and test them.
+
+## Fine-tuning
+
+Hyperparameters, hyperparameters, ah, my good old friends. I genuinely hate them. But, they are essential to optimization, so I must do them. And so must you.
+
+Skitlearn has GridSearchCV, which uses cross-validation of the same model with different hyperparameters of your choosing and chooses the best one. You can refer to any hyperparameter of any estimaator in a pipeine, by the way, however deep it's nested by just using __ a bunch in the name.
+
+Be careful with these. It isn't a very good idea to find out fifty billion different values to test. Just test a few and the most important. Most times, in my experience, the change will be something like a 5% decreasing in the loss function or a 3% increase to accuracy if you're doing classification, but it's very easy to get a worse score if you test out so many different values. That's another way to overfit.
+
+### Randomized search
+
+You can also search random hyperparameters instead of every single one. This is useful if there are a lot of hyperparameters. You also have the benefit of allowing it to check everything however many times you want instead of having a fixed amount of iterations. For each hyperparameter, you must provide either a list of possible values, or a probability distribution.
+
+This is a bunch of info that is usable when doing a machine learning project. Very surface level, normal info, but it's pretty good nonetheless.
