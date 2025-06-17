@@ -55,4 +55,14 @@ To compute it, you need a set of predictions to actually be compared to the targ
 
 ![image](https://github.com/user-attachments/assets/50a9db7b-29d4-4553-be8a-0065442750ac)
 
-This is what it looks like. By default, each row and column is sorted in ascending order. So it's like 
+This is what it looks like. By default, each row and column is sorted in ascending order. 687 were false positives, 1891 were false negatives (slightly more severe), 53892 were true positives, and the rest are true negatives. A perfect classifier would only have non-zero values from the top left to the bottom right, aka it's main diagonal.
+
+### Precision
+
+Confusion matrices give us lots of information, but sometimes, we wan't more concise, straightforward pieces of info. That's why some people like using the accuracy of positive predictions: (true positives)/((true positives)+(false positives)). This is called precision.
+
+A stupid way to have perfect precision is to make a classifier that always makes negative predictions except for a single predictions it's extremely confident about. If that one prediction is correct, then the classifier has 100% precision. That's why, people who like useful information tend to also use **recall**.
+
+### Recall
+
+Recall, also called sensitivity or the 'true positive rate (TPR)' is the ratio of positive instances that are correctly detected by the classifier, so (true positives)/((true positives)+(false negatives))
